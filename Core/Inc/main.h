@@ -57,10 +57,10 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define BUTTON_PIN_Pin GPIO_PIN_13
-#define BUTTON_PIN_GPIO_Port GPIOC
-#define LED_PIN_Pin GPIO_PIN_14
-#define LED_PIN_GPIO_Port GPIOC
+#define BUTTON_Pin GPIO_PIN_13
+#define BUTTON_GPIO_Port GPIOC
+#define LED_Pin GPIO_PIN_14
+#define LED_GPIO_Port GPIOC
 #define RF_FINAL_STAGE_EN_Pin GPIO_PIN_12
 #define RF_FINAL_STAGE_EN_GPIO_Port GPIOB
 #define ADF7012_TxDATA_Pin GPIO_PIN_13

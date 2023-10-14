@@ -43,6 +43,8 @@
 
 /* USER CODE BEGIN PV */
 
+uint8_t activeMode;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -96,6 +98,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+  if (HAL_GPIO_ReadPin(BUTTON_GPIO_Port, BUTTON_Pin)){
+	  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+  }
   }
   /* USER CODE END 3 */
 }
@@ -158,19 +163,19 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, LED_PIN_Pin|ADF7012_CLK_Pin|ADF7012_DATA_Pin|ADF7012_LE_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, LED_Pin|ADF7012_CLK_Pin|ADF7012_DATA_Pin|ADF7012_LE_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, RF_FINAL_STAGE_EN_Pin|ADF7012_TxDATA_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : BUTTON_PIN_Pin */
-  GPIO_InitStruct.Pin = BUTTON_PIN_Pin;
+  /*Configure GPIO pin : BUTTON_Pin */
+  GPIO_InitStruct.Pin = BUTTON_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(BUTTON_PIN_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(BUTTON_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LED_PIN_Pin ADF7012_CLK_Pin ADF7012_DATA_Pin ADF7012_LE_Pin */
-  GPIO_InitStruct.Pin = LED_PIN_Pin|ADF7012_CLK_Pin|ADF7012_DATA_Pin|ADF7012_LE_Pin;
+  /*Configure GPIO pins : LED_Pin ADF7012_CLK_Pin ADF7012_DATA_Pin ADF7012_LE_Pin */
+  GPIO_InitStruct.Pin = LED_Pin|ADF7012_CLK_Pin|ADF7012_DATA_Pin|ADF7012_LE_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
