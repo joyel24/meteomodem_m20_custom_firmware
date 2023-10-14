@@ -227,7 +227,10 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, LED_Pin|ADF7012_CLK_Pin|ADF7012_DATA_Pin|ADF7012_LE_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, RF_FINAL_STAGE_EN_Pin|ADF7012_TxDATA_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, RF_FINAL_STAGE_EN_Pin|ADF7012_TxDATA_Pin|PLL_UnkownIC_LDO_EN_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(DC_BOOST_EN_GPIO_Port, DC_BOOST_EN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : BUTTON_Pin */
   GPIO_InitStruct.Pin = BUTTON_Pin;
@@ -242,12 +245,19 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : RF_FINAL_STAGE_EN_Pin ADF7012_TxDATA_Pin */
-  GPIO_InitStruct.Pin = RF_FINAL_STAGE_EN_Pin|ADF7012_TxDATA_Pin;
+  /*Configure GPIO pins : RF_FINAL_STAGE_EN_Pin ADF7012_TxDATA_Pin PLL_UnkownIC_LDO_EN_Pin */
+  GPIO_InitStruct.Pin = RF_FINAL_STAGE_EN_Pin|ADF7012_TxDATA_Pin|PLL_UnkownIC_LDO_EN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : DC_BOOST_EN_Pin */
+  GPIO_InitStruct.Pin = DC_BOOST_EN_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(DC_BOOST_EN_GPIO_Port, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */

@@ -65,12 +65,16 @@ void Error_Handler(void);
 #define RF_FINAL_STAGE_EN_GPIO_Port GPIOB
 #define ADF7012_TxDATA_Pin GPIO_PIN_13
 #define ADF7012_TxDATA_GPIO_Port GPIOB
+#define PLL_UnkownIC_LDO_EN_Pin GPIO_PIN_15
+#define PLL_UnkownIC_LDO_EN_GPIO_Port GPIOB
 #define ADF7012_CLK_Pin GPIO_PIN_7
 #define ADF7012_CLK_GPIO_Port GPIOC
 #define ADF7012_DATA_Pin GPIO_PIN_8
 #define ADF7012_DATA_GPIO_Port GPIOC
 #define ADF7012_LE_Pin GPIO_PIN_9
 #define ADF7012_LE_GPIO_Port GPIOC
+#define DC_BOOST_EN_Pin GPIO_PIN_12
+#define DC_BOOST_EN_GPIO_Port GPIOA
 
 /* USER CODE BEGIN Private defines */
 
