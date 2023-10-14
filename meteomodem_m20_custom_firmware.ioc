@@ -35,6 +35,7 @@ NVIC.NonMaskableInt_IRQn=true\:0\:0\:false\:false\:true\:false\:false\:false
 NVIC.PendSV_IRQn=true\:0\:0\:false\:false\:true\:false\:false\:false
 NVIC.SVC_IRQn=true\:0\:0\:false\:false\:true\:false\:false\:true
 NVIC.SysTick_IRQn=true\:3\:0\:false\:false\:true\:false\:true\:false
+NVIC.USART1_IRQn=true\:0\:0\:false\:false\:true\:true\:true\:true
 PA10.Locked=true
 PA10.Mode=Asynchronous
 PA10.Signal=USART1_RX
