@@ -1,3 +1,7 @@
+Debug/
+
+# C .gitignore default github file
+
 # Prerequisites
 *.d
 
