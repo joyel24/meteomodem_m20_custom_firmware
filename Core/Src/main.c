@@ -22,6 +22,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include<string.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -41,17 +43,22 @@
 
 /* Private variables ---------------------------------------------------------*/
 UART_HandleTypeDef huart1;
+DMA_HandleTypeDef hdma_usart1_tx;
+DMA_HandleTypeDef hdma_usart1_rx;
 
 /* USER CODE BEGIN PV */
 
+uint8_t serialTXbuffer[2000];
 uint8_t activeMode = 0;
 uint8_t maxActiveMode = 3;
+uint16_t nextModeDalay = 500;
 
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
@@ -59,12 +66,72 @@ static void MX_USART1_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-int mode0(){
-	while ( HAL_GPIO_ReadPin(BUTTON_GPIO_Port, BUTTON_Pin) ) {
-		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+void mode0(){
+	//printf(activeMode);
+	//printfUSART("mode0\n ");
+	//char *buffer
+	sprintf(serialTXbuffer,"mode0 activeMode=%d\n",activeMode);
+	HAL_UART_Transmit_DMA(&huart1, serialTXbuffer, sizeof (serialTXbuffer));
+
+	while (HAL_GPIO_ReadPin(BUTTON_GPIO_Port, BUTTON_Pin)) {
+		HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, SET);
 	}
+	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, RESET);
 	activeMode++;
+	HAL_Delay(nextModeDalay);
 }
+
+void mode1(){
+	//printf(activeMode);
+	//sprintf(serialTXbuffer,"mode1 \n");
+	//HAL_UART_Transmit(&huart1, serialTXbuffer, 0, 1000);
+
+	while (HAL_GPIO_ReadPin(BUTTON_GPIO_Port, BUTTON_Pin)) {
+		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+		HAL_Delay(200);
+	}
+	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, RESET);
+	activeMode++;
+	HAL_Delay(nextModeDalay);
+}
+
+void mode2(){
+	//printf(activeMode);
+	//sprintf(serialTXbuffer,"mode2 ");
+	//HAL_UART_Transmit(&huart1, serialTXbuffer, 10, 1000);
+
+	while (HAL_GPIO_ReadPin(BUTTON_GPIO_Port, BUTTON_Pin)) {
+		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+		HAL_Delay(100);
+	}
+	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, RESET);
+	activeMode++;
+	HAL_Delay(nextModeDalay);
+
+}
+
+void mode3(){
+	//printf(activeMode);
+	//sprintf(serialTXbuffer,"mode3 ");
+	//HAL_UART_Transmit(&huart1, serialTXbuffer, 10, 1000);
+	while (HAL_GPIO_ReadPin(BUTTON_GPIO_Port, BUTTON_Pin)) {
+		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+		HAL_Delay(50);
+
+	}
+	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, RESET);
+	activeMode++;
+	HAL_Delay(nextModeDalay);
+}
+
+/*
+void printfUSART(char *user_data){
+	HAL_UART_Transmit_IT(&huart1,(uint8_t*)user_data,strlen(user_data));
+	//sprintf(user_data, "tes \r\n");
+	//HAL_UART_Transmit_IT(&huart1,(uint8_t*)user_data,strlen(user_data));
+	//user_data="";
+}
+*/
 /* USER CODE END 0 */
 
 /**
@@ -95,6 +162,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
@@ -107,13 +175,22 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  	if (activeMode >= maxActiveMode){activeMode=0;}
+  	if (activeMode > maxActiveMode){activeMode=0;}
 
 		switch (activeMode)
 		{
 			case 0:
-				mode0();
-				break;
+							mode0();
+							break;
+			case 1:
+							mode1();
+							break;
+			case 2:
+							mode2();
+							break;
+			case 3:
+							mode3();
+							break;
 
 			default:
 				break;
@@ -203,6 +280,22 @@ static void MX_USART1_UART_Init(void)
   /* USER CODE BEGIN USART1_Init 2 */
 
   /* USER CODE END USART1_Init 2 */
+
+}
+
+/**
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void)
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA1_Channel2_3_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel2_3_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel2_3_IRQn);
 
 }
 
