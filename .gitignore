@@ -1,7 +1,7 @@
 Debug/
 *Debug.launch
 *.DS_Store
-
+*Debug.cfg
 # C .gitignore default github file
 
 # Prerequisites

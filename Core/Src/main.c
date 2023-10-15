@@ -22,6 +22,9 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+//#include "modes.h"
+#include <string.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -40,12 +43,17 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+TIM_HandleTypeDef htim6;
+
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
 
 uint8_t activeMode = 0;
-uint8_t maxActiveMode = 3;
+uint8_t maxActiveMode;
+uint8_t serialTXbuffer[2000];
+
+//extern void mode0();
 
 /* USER CODE END PV */
 
@@ -53,7 +61,16 @@ uint8_t maxActiveMode = 3;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART1_UART_Init(void);
+static void MX_TIM6_Init(void);
 /* USER CODE BEGIN PFP */
+
+
+/* USER CODE END PFP */
+
+/* Private user code ---------------------------------------------------------*/
+/* USER CODE BEGIN 0 */
+
+
 
 void myspi(uint32_t data)
 {
@@ -96,71 +113,11 @@ uint32_t setfreq(float freq, float fPFD, uint8_t prescaler)
 	return ret;
 }
 
-/* USER CODE END PFP */
-
-/* Private user code ---------------------------------------------------------*/
-/* USER CODE BEGIN 0 */
-void mode0(){
-	HAL_GPIO_WritePin(GPS_Heater_LDO_EN_GPIO_Port, GPS_Heater_LDO_EN_Pin, GPIO_PIN_SET); //Enable GPS & Heater
-	HAL_GPIO_WritePin(PLL_UnkownIC_LDO_EN_GPIO_Port, PLL_UnkownIC_LDO_EN_Pin, GPIO_PIN_SET); //Enable PLL &
-
-	HAL_Delay(200);
-
-	//403,5 MHz
-	myspi(0x03c4204c);/* Reg 0 R Register
-	Output divider = devide 2 0b01
-	VCO Adjustment = Max VCO Adj 0b11
-	Clock out divider = 0b1000 = 16
-	XOEB = 1 (XTAL Osc Off)
-	Crystal doubler OFF
-	4bit R div = 0b001 = 1
-	11Bit Freq err corr 0b10011
-	*/
-	myspi(0x000c9c01);/*
-	Prescaler = 0b0 = 4/5
-	8Bits integer N = 0b110010
-	12bits factional N = 0b011100000000
-
-	*/
-	myspi(0x00005fe2);/*
-	Modulation register
-	Index counter 0b00 16
-	GFSK Mod 0b000 0
-	Modulation deviation ????
-	Power ampli 0b111111
-	GOOK 0 = Gaussian OOK = Off
-	Mod control 0b00 FSK
-	*/
-	myspi(0x007418af);/*
-	PA BIAS 0b111 = 12uA
-	VCO BIAS current 0b0100
-	LD1 0b0 3 Cycles
-	MUXOUT = 0b0011 = Regulator ready
-	VCO Disable = 0b0 = VCO ON
-	Bleed Down up 0b0 0b0 off off
-	Charge pump = 0b10 1.5mA
-	Data invert = 0b1 = inverted
-	clkout enable = 0b0 = Off
-	PA Enable = 0b1 PA on
-	PLL Enable = 0b1 PLL On
-	*/
-
-	myspi(0x03c4204c);
-	myspi(setfreq(446100000, 8000000, 0));
-	myspi(0x00002ce2);
-
-	HAL_GPIO_WritePin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin, RESET);
-	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, RESET);
-	while ( HAL_GPIO_ReadPin(BUTTON_GPIO_Port, BUTTON_Pin) ) {
-		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-		HAL_GPIO_TogglePin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin);
-		HAL_Delay(200);
-	}
-
-	HAL_GPIO_WritePin(GPS_Heater_LDO_EN_GPIO_Port, GPS_Heater_LDO_EN_Pin, GPIO_PIN_RESET); //Disable GPS & Heater
-	HAL_GPIO_WritePin(PLL_UnkownIC_LDO_EN_GPIO_Port, PLL_UnkownIC_LDO_EN_Pin, GPIO_PIN_RESET); //Disable PLL &
-	activeMode++;
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
+{
+   HAL_UART_Transmit_IT(&huart1, serialTXbuffer, sizeof (serialTXbuffer));
 }
+
 /* USER CODE END 0 */
 
 /**
@@ -192,6 +149,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART1_UART_Init();
+  MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
 
   HAL_GPIO_WritePin(DC_BOOST_EN_GPIO_Port, DC_BOOST_EN_Pin, GPIO_PIN_SET); //Enable DC Boost
@@ -210,9 +168,67 @@ int main(void)
 		switch (activeMode)
 		{
 			case 0:
+				HAL_GPIO_WritePin(GPS_Heater_LDO_EN_GPIO_Port, GPS_Heater_LDO_EN_Pin, GPIO_PIN_SET); //Enable GPS & Heater
+					HAL_GPIO_WritePin(PLL_UnkownIC_LDO_EN_GPIO_Port, PLL_UnkownIC_LDO_EN_Pin, GPIO_PIN_SET); //Enable PLL &
+
+					HAL_Delay(200);
+
+					//403,5 MHz
+					myspi(0x03c4204c);/* Reg 0 R Register
+					Output divider = devide 2 0b01
+					VCO Adjustment = Max VCO Adj 0b11
+					Clock out divider = 0b1000 = 16
+					XOEB = 1 (XTAL Osc Off)
+					Crystal doubler OFF
+					4bit R div = 0b001 = 1
+					11Bit Freq err corr 0b10011
+					*/
+					myspi(0x000c9c01);/*
+					Prescaler = 0b0 = 4/5
+					8Bits integer N = 0b110010
+					12bits factional N = 0b011100000000
+
+					*/
+					myspi(0x00005fe2);/*
+					Modulation register
+					Index counter 0b00 16
+					GFSK Mod 0b000 0
+					Modulation deviation ????
+					Power ampli 0b111111
+					GOOK 0 = Gaussian OOK = Off
+					Mod control 0b00 FSK
+					*/
+					myspi(0x007418af);/*
+					PA BIAS 0b111 = 12uA
+					VCO BIAS current 0b0100
+					LD1 0b0 3 Cycles
+					MUXOUT = 0b0011 = Regulator ready
+					VCO Disable = 0b0 = VCO ON
+					Bleed Down up 0b0 0b0 off off
+					Charge pump = 0b10 1.5mA
+					Data invert = 0b1 = inverted
+					clkout enable = 0b0 = Off
+					PA Enable = 0b1 PA on
+					PLL Enable = 0b1 PLL On
+					*/
+
+					myspi(0x03c4204c);
+					myspi(setfreq(446100000, 8000000, 0));
+					myspi(0x00002ce2);
+
+
+
 				mode0();
 				break;
+			case 1:
 
+				sprintf(serialTXbuffer,"mode1\n");
+				HAL_UART_Transmit(&huart1, serialTXbuffer, 10, sizeof (serialTXbuffer));
+				if ( HAL_GPIO_ReadPin(BUTTON_GPIO_Port, BUTTON_Pin == 0) ) { activeMode++; }
+				break;
+			case 2:
+				activeMode=0;
+				break;
 			default:
 				break;
 		}
@@ -266,6 +282,44 @@ void SystemClock_Config(void)
     Error_Handler();
   }
   HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_SYSCLK, RCC_MCODIV_1);
+}
+
+/**
+  * @brief TIM6 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM6_Init(void)
+{
+
+  /* USER CODE BEGIN TIM6_Init 0 */
+
+  /* USER CODE END TIM6_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM6_Init 1 */
+
+  /* USER CODE END TIM6_Init 1 */
+  htim6.Instance = TIM6;
+  htim6.Init.Prescaler = 800-1;
+  htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim6.Init.Period = 65536-1;
+  htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim6, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM6_Init 2 */
+
+  /* USER CODE END TIM6_Init 2 */
+
 }
 
 /**

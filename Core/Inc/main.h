@@ -36,7 +36,9 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-
+extern uint8_t serialTXbuffer[2000];
+extern void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart);
+extern UART_HandleTypeDef huart1;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -81,6 +83,7 @@ void Error_Handler(void);
 #define DC_BOOST_EN_GPIO_Port GPIOA
 
 /* USER CODE BEGIN Private defines */
+/*
 #define Pin4_Pin GPIO_PIN_0
 #define Pin4_GPIO_Port GPIOA
 #define Pin13____Pin GPIO_PIN_3
@@ -109,6 +112,9 @@ void Error_Handler(void);
 #define Main_Supply_GPIO_Port GPIOA
 #define GPS_Data_Pin GPIO_PIN_11
 #define GPS_Data_GPIO_Port GPIOC
+*/
+extern uint8_t activeMode;
+extern uint8_t maxActiveMode;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
