@@ -49,8 +49,8 @@ UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
 
-uint8_t activeMode = 0;
-uint8_t maxActiveMode;
+uint8_t activeMode = 2;
+uint8_t maxActiveMode = 5;
 uint8_t serialTXbuffer[2000];
 
 //extern void mode0();
@@ -118,6 +118,107 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
    HAL_UART_Transmit_IT(&huart1, serialTXbuffer, sizeof (serialTXbuffer));
 }
 
+void clearbuffer(){
+	for (int i=0; i < sizeof(serialTXbuffer); i++){
+		serialTXbuffer[i]='\0';
+	}
+}
+
+void printstr(char test[]){
+	sprintf(serialTXbuffer,"%s \n", test);
+	HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+	clearbuffer();
+}
+
+void mode1(){
+	HAL_GPIO_WritePin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin, RESET);
+	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, RESET);
+	sprintf(serialTXbuffer,"mode1()\nTxDATA:\n");
+	HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+	HAL_Delay(100);
+	//HAL_UART_Transmit_IT(&huart1, serialTXbuffer, sizeof (serialTXbuffer));
+	while (activeMode == 1){
+
+
+		//while ( HAL_GPIO_ReadPin(BUTTON_GPIO_Port, BUTTON_Pin == 0) ) {
+			HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+			HAL_GPIO_TogglePin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin);
+			clearbuffer();
+			sprintf(serialTXbuffer,"%d", HAL_GPIO_ReadPin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin));
+			HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+			HAL_Delay(100);
+		//}
+
+		//HAL_GPIO_WritePin(GPS_Heater_LDO_EN_GPIO_Port, GPS_Heater_LDO_EN_Pin, GPIO_PIN_RESET); //Disable GPS & Heater
+
+		if ( HAL_GPIO_ReadPin(BUTTON_GPIO_Port, BUTTON_Pin) == 0 ) {
+			sprintf(serialTXbuffer,"\nswitch mode request\n");
+			HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+			clearbuffer();
+			HAL_GPIO_WritePin(PLL_UnkownIC_LDO_EN_GPIO_Port, PLL_UnkownIC_LDO_EN_Pin, GPIO_PIN_RESET); //Disable PLL &
+			HAL_GPIO_WritePin(RF_FINAL_STAGE_EN_GPIO_Port, RF_FINAL_STAGE_EN_Pin, GPIO_PIN_RESET);
+			printstr("PLL & RF Stage : OFF");
+			activeMode++;
+		}
+	}
+}
+
+void mode3(){
+	sprintf(serialTXbuffer,"mode3()\nTxDATA:\n");
+	HAL_GPIO_WritePin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin, RESET);
+	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, RESET);
+	HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+	HAL_Delay(100);
+
+	while (activeMode == 3){
+		TxDATA_test("10101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101011011000000101011101001001111100100101111100000110001001011110101001011111000001100010010111101010100101000111010000000000000000111000000110101110100110100010111111010001010001111110111100110101101001000001110000000010000000100101111100000110001001011110101001011111000001100010010111101010010111110000011000100101111010100101111100000110001001011110101001011111000001100010010111101010010111110000011000100101111010100101111100000110001001011110101001011111000001100010010111101010010111110000011000100101111010100101111100000110001001011110101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101101100000010101110100100111110010010111110000011000100101111010100101111100000110001001011110101001011111000001100010010111101010010111110000011000100101111010101001010001110100000000000000001000011010011111111101101111011111110001001000011001001111001101100000000000010100000000111010101001011111000001100010010111101010010111110000011000100101111010100101111100000110001001011110101001011111000001100010010111101010010111110000011000100101111010100101111100000110001001011110101001011111000001100010010111101010010111110000011000100101111010");
+		HAL_Delay(1500);
+		if ( HAL_GPIO_ReadPin(BUTTON_GPIO_Port, BUTTON_Pin) == 0 ) {
+			sprintf(serialTXbuffer,"\nswitch mode request\n");
+			HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+			clearbuffer();
+			HAL_GPIO_WritePin(PLL_UnkownIC_LDO_EN_GPIO_Port, PLL_UnkownIC_LDO_EN_Pin, GPIO_PIN_RESET); //Disable PLL &
+			HAL_GPIO_WritePin(RF_FINAL_STAGE_EN_GPIO_Port, RF_FINAL_STAGE_EN_Pin, GPIO_PIN_RESET);
+			printstr("PLL & RF Stage : OFF");
+			activeMode++;
+		}
+	}
+}
+
+void TxDATA_test(char bits[]){
+	//if (stop==0){
+	for (int16_t bitNumber=0; bitNumber < 1120; bitNumber++){
+		if (bits[bitNumber] == '0'){
+			HAL_GPIO_WritePin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin, GPIO_PIN_RESET);
+
+			//HAL_UART_Transmit(&huart1, UartBuffOut, strlen(UartBuffOut), 1000);
+			//clearbuffer();
+			//sprintf(serialTXbuffer,"%d", HAL_GPIO_ReadPin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin));
+			//HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+			HAL_Delay(1);
+			}
+		else if(bits[bitNumber] == '1'){
+			//HAL_UART_Transmit(&huart1, UartBuffOut, strlen(UartBuffOut), 1000);
+			HAL_GPIO_WritePin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin, GPIO_PIN_SET);
+			//clearbuffer();
+			//sprintf(serialTXbuffer,"%d", HAL_GPIO_ReadPin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin));
+			//HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+			HAL_Delay(1);
+		}
+		//bitNumber++;
+	}
+}
+
+	/*
+		if (bitNumber >= 1120){
+			HAL_GPIO_WritePin(PLL_UnkownIC_LDO_EN_GPIO_Port, PLL_UnkownIC_LDO_EN_Pin, GPIO_PIN_RESET); //Disable PLL &
+			HAL_GPIO_WritePin(RF_FINAL_STAGE_EN_GPIO_Port, RF_FINAL_STAGE_EN_Pin, GPIO_PIN_RESET);
+			printstr("PLL & RF Stage : OFF");
+	//		stop=1; bitNumber=0;}
+	 *
+	//}
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -163,70 +264,190 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	printstr("\n\nMain While");
+
+	sprintf(serialTXbuffer,"activeMode=%d\n", activeMode);
+	HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+	clearbuffer();
+
   	if (activeMode > maxActiveMode){activeMode=0;}
 
 		switch (activeMode)
 		{
 			case 0:
-				HAL_GPIO_WritePin(GPS_Heater_LDO_EN_GPIO_Port, GPS_Heater_LDO_EN_Pin, GPIO_PIN_SET); //Enable GPS & Heater
-					HAL_GPIO_WritePin(PLL_UnkownIC_LDO_EN_GPIO_Port, PLL_UnkownIC_LDO_EN_Pin, GPIO_PIN_SET); //Enable PLL &
+				printstr("case 0");
+				//HAL_GPIO_WritePin(GPS_Heater_LDO_EN_GPIO_Port, GPS_Heater_LDO_EN_Pin, GPIO_PIN_SET); //Enable GPS & Heater
+				HAL_GPIO_WritePin(PLL_UnkownIC_LDO_EN_GPIO_Port, PLL_UnkownIC_LDO_EN_Pin, GPIO_PIN_SET); //Enable PLL &
+				HAL_GPIO_WritePin(RF_FINAL_STAGE_EN_GPIO_Port, RF_FINAL_STAGE_EN_Pin, GPIO_PIN_SET); //Enable RF Stage
+				printstr("PLL & RF Stage : ON");
+				HAL_Delay(200);
 
-					HAL_Delay(200);
+				//403,5 MHz
+				myspi(0x03c4204c);/* Reg 0 R Register
+				Output divider = devide 2 0b01
+				VCO Adjustment = Max VCO Adj 0b11
+				Clock out divider = 0b1000 = 16
+				XOEB = 1 (XTAL Osc Off)
+				Crystal doubler OFF
+				4bit R div = 0b001 = 1
+				11Bit Freq err corr 0b10011
+				*/
+				myspi(0x000c9c01);/*
+				Prescaler = 0b0 = 4/5
+				8Bits integer N = 0b110010
+				12bits factional N = 0b011100000000
 
-					//403,5 MHz
-					myspi(0x03c4204c);/* Reg 0 R Register
-					Output divider = devide 2 0b01
-					VCO Adjustment = Max VCO Adj 0b11
-					Clock out divider = 0b1000 = 16
-					XOEB = 1 (XTAL Osc Off)
-					Crystal doubler OFF
-					4bit R div = 0b001 = 1
-					11Bit Freq err corr 0b10011
-					*/
-					myspi(0x000c9c01);/*
-					Prescaler = 0b0 = 4/5
-					8Bits integer N = 0b110010
-					12bits factional N = 0b011100000000
+				*/
+				myspi(0x00005fe2);/*
+				Modulation register
+				Index counter 0b00 16
+				GFSK Mod 0b000 0
+				Modulation deviation ????
+				Power ampli 0b111111
+				GOOK 0 = Gaussian OOK = Off
+				Mod control 0b00 FSK
+				*/
+				myspi(0x007418af);/*
+				PA BIAS 0b111 = 12uA
+				VCO BIAS current 0b0100
+				LD1 0b0 3 Cycles
+				MUXOUT = 0b0011 = Regulator ready
+				VCO Disable = 0b0 = VCO ON
+				Bleed Down up 0b0 0b0 off off
+				Charge pump = 0b10 1.5mA
+				Data invert = 0b1 = inverted
+				clkout enable = 0b0 = Off
+				PA Enable = 0b1 PA on
+				PLL Enable = 0b1 PLL On
+				*/
 
-					*/
-					myspi(0x00005fe2);/*
-					Modulation register
-					Index counter 0b00 16
-					GFSK Mod 0b000 0
-					Modulation deviation ????
-					Power ampli 0b111111
-					GOOK 0 = Gaussian OOK = Off
-					Mod control 0b00 FSK
-					*/
-					myspi(0x007418af);/*
-					PA BIAS 0b111 = 12uA
-					VCO BIAS current 0b0100
-					LD1 0b0 3 Cycles
-					MUXOUT = 0b0011 = Regulator ready
-					VCO Disable = 0b0 = VCO ON
-					Bleed Down up 0b0 0b0 off off
-					Charge pump = 0b10 1.5mA
-					Data invert = 0b1 = inverted
-					clkout enable = 0b0 = Off
-					PA Enable = 0b1 PA on
-					PLL Enable = 0b1 PLL On
-					*/
-
-					myspi(0x03c4204c);
-					myspi(setfreq(446100000, 8000000, 0));
-					myspi(0x00002ce2);
-
-
+				myspi(0x03c4204c);
+				myspi(setfreq(446100000, 8000000, 0));
+				myspi(0x00002ce2);
 
 				mode0();
 				break;
+
 			case 1:
 
-				sprintf(serialTXbuffer,"mode1\n");
-				HAL_UART_Transmit(&huart1, serialTXbuffer, 10, sizeof (serialTXbuffer));
-				if ( HAL_GPIO_ReadPin(BUTTON_GPIO_Port, BUTTON_Pin == 0) ) { activeMode++; }
+				printstr("case 1");
+				HAL_GPIO_WritePin(PLL_UnkownIC_LDO_EN_GPIO_Port, PLL_UnkownIC_LDO_EN_Pin, GPIO_PIN_SET); //Enable PLL &
+				HAL_GPIO_WritePin(RF_FINAL_STAGE_EN_GPIO_Port, RF_FINAL_STAGE_EN_Pin, GPIO_PIN_SET); //Enable RF Stage
+				printstr("PLL & RF Stage : ON");
+				HAL_Delay(200);
+
+				//403,5 MHz
+				myspi(0x03c4204c);/* Reg 0 R Register
+				Output divider = devide 2 0b01
+				VCO Adjustment = Max VCO Adj 0b11
+				Clock out divider = 0b1000 = 16
+				XOEB = 1 (XTAL Osc Off)
+				Crystal doubler OFF
+				4bit R div = 0b001 = 1
+				11Bit Freq err corr 0b10011
+				*/
+				myspi(0x000c9c01);/*
+				Prescaler = 0b0 = 4/5
+				8Bits integer N = 0b110010
+				12bits factional N = 0b011100000000
+
+				*/
+				myspi(0x00005fe2);/*
+				Modulation register
+				Index counter 0b00 16
+				GFSK Mod 0b000 0
+				Modulation deviation ????
+				Power ampli 0b111111
+				GOOK 0 = Gaussian OOK = Off
+				Mod control 0b00 FSK
+				*/
+				myspi(0x007418af);/*
+				PA BIAS 0b111 = 12uA
+				VCO BIAS current 0b0100
+				LD1 0b0 3 Cycles
+				MUXOUT = 0b0011 = Regulator ready
+				VCO Disable = 0b0 = VCO ON
+				Bleed Down up 0b0 0b0 off off
+				Charge pump = 0b10 1.5mA
+				Data invert = 0b1 = inverted
+				clkout enable = 0b0 = Off
+				PA Enable = 0b1 PA on
+				PLL Enable = 0b1 PLL On
+				*/
+
+				myspi(0x03c4204c);
+				myspi(setfreq(446100000, 8000000, 0));
+				myspi(0x00002ce2);
+
+				mode1();
+				/*
+				while (activeMode==1) {
+					HAL_Delay(500);
+					if ( HAL_GPIO_ReadPin(BUTTON_GPIO_Port, BUTTON_Pin) ==0 ) { activeMode++; }
+				}*/
 				break;
 			case 2:
+
+				printstr("case 2 not yet programmed (off tx)");
+				while (activeMode==2) {
+					HAL_Delay(500);
+					if ( HAL_GPIO_ReadPin(BUTTON_GPIO_Port, BUTTON_Pin) ==0 ) { activeMode++; }
+				}
+				break;
+			case 3:
+				printstr("case 3");
+				HAL_GPIO_WritePin(PLL_UnkownIC_LDO_EN_GPIO_Port, PLL_UnkownIC_LDO_EN_Pin, GPIO_PIN_SET); //Enable PLL &
+				HAL_GPIO_WritePin(RF_FINAL_STAGE_EN_GPIO_Port, RF_FINAL_STAGE_EN_Pin, GPIO_PIN_SET); //Enable RF Stage
+				printstr("PLL & RF Stage : ON");
+				HAL_Delay(200);
+
+				//403,5 MHz
+				myspi(0x03c4204c);/* Reg 0 R Register
+				Output divider = devide 2 0b01
+				VCO Adjustment = Max VCO Adj 0b11
+				Clock out divider = 0b1000 = 16
+				XOEB = 1 (XTAL Osc Off)
+				Crystal doubler OFF
+				4bit R div = 0b001 = 1
+				11Bit Freq err corr 0b10011
+				*/
+				myspi(0x000c9c01);/*
+				Prescaler = 0b0 = 4/5
+				8Bits integer N = 0b110010
+				12bits factional N = 0b011100000000
+
+				*/
+				myspi(0x00005fe2);/*
+				Modulation register
+				Index counter 0b00 16
+				GFSK Mod 0b000 0
+				Modulation deviation ????
+				Power ampli 0b111111
+				GOOK 0 = Gaussian OOK = Off
+				Mod control 0b00 FSK
+				*/
+				myspi(0x007418af);/*
+				PA BIAS 0b111 = 12uA
+				VCO BIAS current 0b0100
+				LD1 0b0 3 Cycles
+				MUXOUT = 0b0011 = Regulator ready
+				VCO Disable = 0b0 = VCO ON
+				Bleed Down up 0b0 0b0 off off
+				Charge pump = 0b10 1.5mA
+				Data invert = 0b1 = inverted
+				clkout enable = 0b0 = Off
+				PA Enable = 0b1 PA on
+				PLL Enable = 0b1 PLL On
+				*/
+
+				myspi(0x03c4204c);
+				myspi(setfreq(446100000, 8000000, 0));
+				myspi(0x00002ce2);
+
+				mode3();
+				break;
+			case 4:
+				printstr("case 4 > Switch to case 0");
 				activeMode=0;
 				break;
 			default:
