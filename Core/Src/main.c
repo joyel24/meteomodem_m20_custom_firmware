@@ -283,7 +283,7 @@ int main(void)
 				HAL_Delay(200);
 
 				//403,5 MHz
-				myspi(0x03c4204c);/* Reg 0 R Register
+				myspi(0b00000011110001000010000001001100);/* Reg 0 R Register
 				Output divider = devide 2 0b01
 				VCO Adjustment = Max VCO Adj 0b11
 				Clock out divider = 0b1000 = 16
@@ -292,13 +292,13 @@ int main(void)
 				4bit R div = 0b001 = 1
 				11Bit Freq err corr 0b10011
 				*/
-				myspi(0x000c9c01);/*
+				myspi(0b00000000000011001001110000000001);/*
 				Prescaler = 0b0 = 4/5
 				8Bits integer N = 0b110010
 				12bits factional N = 0b011100000000
 
 				*/
-				myspi(0x00005fe2);/*
+				myspi(0b00000000000000000101111111100010);/*
 				Modulation register
 				Index counter 0b00 16
 				GFSK Mod 0b000 0
@@ -307,7 +307,7 @@ int main(void)
 				GOOK 0 = Gaussian OOK = Off
 				Mod control 0b00 FSK
 				*/
-				myspi(0x007418af);/*
+				myspi(0b00000000011101000001100010101111);/*
 				PA BIAS 0b111 = 12uA
 				VCO BIAS current 0b0100
 				LD1 0b0 3 Cycles
@@ -321,9 +321,9 @@ int main(void)
 				PLL Enable = 0b1 PLL On
 				*/
 
-				myspi(0x03c4204c);
+				myspi(0b00000011110001000010000001001100);
 				myspi(setfreq(446100000, 8000000, 0));
-				myspi(0x00002ce2);
+				myspi(0b00000000000000000010110011100010);
 
 				mode0();
 				break;
@@ -337,7 +337,7 @@ int main(void)
 				HAL_Delay(200);
 
 				//403,5 MHz
-				myspi(0x03c4204c);/* Reg 0 R Register
+				myspi(0b00000011110001000010000001001100);/* Reg 0 R Register
 				Output divider = devide 2 0b01
 				VCO Adjustment = Max VCO Adj 0b11
 				Clock out divider = 0b1000 = 16
@@ -346,13 +346,13 @@ int main(void)
 				4bit R div = 0b001 = 1
 				11Bit Freq err corr 0b10011
 				*/
-				myspi(0x000c9c01);/*
+				myspi(0b00000000000011001001110000000001);/*
 				Prescaler = 0b0 = 4/5
 				8Bits integer N = 0b110010
 				12bits factional N = 0b011100000000
 
 				*/
-				myspi(0x00005fe2);/*
+				myspi(0b00000000000000000101111111100010);/*
 				Modulation register
 				Index counter 0b00 16
 				GFSK Mod 0b000 0
@@ -361,7 +361,7 @@ int main(void)
 				GOOK 0 = Gaussian OOK = Off
 				Mod control 0b00 FSK
 				*/
-				myspi(0x007418af);/*
+				myspi(0b00000000011101000001100010101111);/*
 				PA BIAS 0b111 = 12uA
 				VCO BIAS current 0b0100
 				LD1 0b0 3 Cycles
@@ -375,9 +375,9 @@ int main(void)
 				PLL Enable = 0b1 PLL On
 				*/
 
-				myspi(0x03c4204c);
+				myspi(0b00000011110001000010000001001100);
 				myspi(setfreq(446100000, 8000000, 0));
-				myspi(0x00002ce2);
+				myspi(0b00000000000000000010110011100010);
 
 				mode1();
 				/*
@@ -402,7 +402,7 @@ int main(void)
 				HAL_Delay(200);
 
 				//403,5 MHz
-				myspi(0x03c4204c);/* Reg 0 R Register
+				myspi(0b00000011110001000010000001001100);/* Reg 0 R Register
 				Output divider = devide 2 0b01
 				VCO Adjustment = Max VCO Adj 0b11
 				Clock out divider = 0b1000 = 16
@@ -411,13 +411,13 @@ int main(void)
 				4bit R div = 0b001 = 1
 				11Bit Freq err corr 0b10011
 				*/
-				myspi(0x000c9c01);/*
+				myspi(0b00000000000011001001110000000001);/*
 				Prescaler = 0b0 = 4/5
 				8Bits integer N = 0b110010
 				12bits factional N = 0b011100000000
 
 				*/
-				myspi(0x00005fe2);/*
+				myspi(0b00000000000000000101111111100010);/*
 				Modulation register
 				Index counter 0b00 16
 				GFSK Mod 0b000 0
@@ -426,7 +426,7 @@ int main(void)
 				GOOK 0 = Gaussian OOK = Off
 				Mod control 0b00 FSK
 				*/
-				myspi(0x007418af);/*
+				myspi(0b00000000011101000001100010101111);/*
 				PA BIAS 0b111 = 12uA
 				VCO BIAS current 0b0100
 				LD1 0b0 3 Cycles
@@ -440,9 +440,9 @@ int main(void)
 				PLL Enable = 0b1 PLL On
 				*/
 
-				myspi(0x03c4204c);
+				myspi(0b00000011110001000010000001001100);
 				myspi(setfreq(446100000, 8000000, 0));
-				myspi(0x00002ce2);
+				myspi(0b00000000000000000010110011100010);
 
 				mode3();
 				break;
