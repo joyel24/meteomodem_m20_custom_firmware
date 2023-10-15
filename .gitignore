@@ -1,5 +1,6 @@
 Debug/
 *Debug.launch
+*.DS_Store
 
 # C .gitignore default github file
 
