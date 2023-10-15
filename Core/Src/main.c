@@ -55,14 +55,110 @@ static void MX_GPIO_Init(void);
 static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
+void myspi(uint32_t data)
+{
+	//uint32_t delay = 0;
+	HAL_GPIO_WritePin(ADF7012_LE_GPIO_Port, ADF7012_LE_Pin, GPIO_PIN_RESET);
+	//HAL_GPIO_WritePin(LE_GPIO_Port, LE_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(ADF7012_DATA_GPIO_Port, ADF7012_DATA_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(ADF7012_CLK_GPIO_Port, ADF7012_CLK_Pin, GPIO_PIN_RESET);
+	//HAL_Delay(delay);
+	__HAL_RCC_GPIOA_CLK_ENABLE();
+	for (int i = 0; i < 32; i++) {
+		HAL_GPIO_WritePin(ADF7012_CLK_GPIO_Port, ADF7012_CLK_Pin, GPIO_PIN_RESET);
+		if (data & 0b10000000000000000000000000000000)
+		{
+			HAL_GPIO_WritePin(ADF7012_DATA_GPIO_Port, ADF7012_DATA_Pin, GPIO_PIN_SET);
+		} else {
+			HAL_GPIO_WritePin(ADF7012_DATA_GPIO_Port, ADF7012_DATA_Pin, GPIO_PIN_RESET);
+		}
+		//HAL_Delay(delay);
+		HAL_GPIO_WritePin(ADF7012_CLK_GPIO_Port, ADF7012_CLK_Pin, GPIO_PIN_SET);
+		data = data << 1;
+	}
+	HAL_GPIO_WritePin(ADF7012_LE_GPIO_Port, ADF7012_LE_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(ADF7012_LE_GPIO_Port, ADF7012_LE_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(ADF7012_CLK_GPIO_Port, ADF7012_CLK_Pin, GPIO_PIN_RESET);
+
+}
+
+uint32_t setfreq(float freq, float fPFD, uint8_t prescaler)
+{
+	float latch = freq / fPFD;
+	uint32_t Nint = latch;
+	latch = latch - Nint;
+	uint32_t Nfrac = latch * 4096;
+	uint32_t ret = 0;
+	ret = ret | prescaler << 22;
+	ret = ret | Nint << 14;
+	ret = ret | Nfrac << 2;
+	ret = ret | 0b00000001;
+	return ret;
+}
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-int mode0(){
+void mode0(){
+	HAL_GPIO_WritePin(GPS_Heater_LDO_EN_GPIO_Port, GPS_Heater_LDO_EN_Pin, GPIO_PIN_SET); //Enable GPS & Heater
+	HAL_GPIO_WritePin(PLL_UnkownIC_LDO_EN_GPIO_Port, PLL_UnkownIC_LDO_EN_Pin, GPIO_PIN_SET); //Enable PLL &
+
+	HAL_Delay(200);
+
+	//403,5 MHz
+	myspi(0x03c4204c);/* Reg 0 R Register
+	Output divider = devide 2 0b01
+	VCO Adjustment = Max VCO Adj 0b11
+	Clock out divider = 0b1000 = 16
+	XOEB = 1 (XTAL Osc Off)
+	Crystal doubler OFF
+	4bit R div = 0b001 = 1
+	11Bit Freq err corr 0b10011
+	*/
+	myspi(0x000c9c01);/*
+	Prescaler = 0b0 = 4/5
+	8Bits integer N = 0b110010
+	12bits factional N = 0b011100000000
+
+	*/
+	myspi(0x00005fe2);/*
+	Modulation register
+	Index counter 0b00 16
+	GFSK Mod 0b000 0
+	Modulation deviation ????
+	Power ampli 0b111111
+	GOOK 0 = Gaussian OOK = Off
+	Mod control 0b00 FSK
+	*/
+	myspi(0x007418af);/*
+	PA BIAS 0b111 = 12uA
+	VCO BIAS current 0b0100
+	LD1 0b0 3 Cycles
+	MUXOUT = 0b0011 = Regulator ready
+	VCO Disable = 0b0 = VCO ON
+	Bleed Down up 0b0 0b0 off off
+	Charge pump = 0b10 1.5mA
+	Data invert = 0b1 = inverted
+	clkout enable = 0b0 = Off
+	PA Enable = 0b1 PA on
+	PLL Enable = 0b1 PLL On
+	*/
+
+	myspi(0x03c4204c);
+	myspi(setfreq(446100000, 8000000, 0));
+	myspi(0x00002ce2);
+
+	HAL_GPIO_WritePin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin, RESET);
+	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, RESET);
 	while ( HAL_GPIO_ReadPin(BUTTON_GPIO_Port, BUTTON_Pin) ) {
 		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+		HAL_GPIO_TogglePin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin);
+		HAL_Delay(200);
 	}
+
+	HAL_GPIO_WritePin(GPS_Heater_LDO_EN_GPIO_Port, GPS_Heater_LDO_EN_Pin, GPIO_PIN_RESET); //Disable GPS & Heater
+	HAL_GPIO_WritePin(PLL_UnkownIC_LDO_EN_GPIO_Port, PLL_UnkownIC_LDO_EN_Pin, GPIO_PIN_RESET); //Disable PLL &
 	activeMode++;
 }
 /* USER CODE END 0 */
@@ -98,6 +194,8 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
+  HAL_GPIO_WritePin(DC_BOOST_EN_GPIO_Port, DC_BOOST_EN_Pin, GPIO_PIN_SET); //Enable DC Boost
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -107,7 +205,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  	if (activeMode >= maxActiveMode){activeMode=0;}
+  	if (activeMode > maxActiveMode){activeMode=0;}
 
 		switch (activeMode)
 		{
@@ -140,10 +238,8 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_MSI;
-  RCC_OscInitStruct.MSIState = RCC_MSI_ON;
-  RCC_OscInitStruct.MSICalibrationValue = 0;
-  RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_5;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
@@ -154,7 +250,7 @@ void SystemClock_Config(void)
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_MSI;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSE;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
@@ -169,6 +265,7 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+  HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_SYSCLK, RCC_MCODIV_1);
 }
 
 /**
@@ -227,7 +324,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, LED_Pin|ADF7012_CLK_Pin|ADF7012_DATA_Pin|ADF7012_LE_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, RF_FINAL_STAGE_EN_Pin|ADF7012_TxDATA_Pin|PLL_UnkownIC_LDO_EN_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, RF_FINAL_STAGE_EN_Pin|ADF7012_TxDATA_Pin|GPS_Heater_LDO_EN_Pin|PLL_UnkownIC_LDO_EN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(DC_BOOST_EN_GPIO_Port, DC_BOOST_EN_Pin, GPIO_PIN_RESET);
@@ -245,12 +342,20 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : RF_FINAL_STAGE_EN_Pin ADF7012_TxDATA_Pin PLL_UnkownIC_LDO_EN_Pin */
-  GPIO_InitStruct.Pin = RF_FINAL_STAGE_EN_Pin|ADF7012_TxDATA_Pin|PLL_UnkownIC_LDO_EN_Pin;
+  /*Configure GPIO pins : RF_FINAL_STAGE_EN_Pin ADF7012_TxDATA_Pin GPS_Heater_LDO_EN_Pin PLL_UnkownIC_LDO_EN_Pin */
+  GPIO_InitStruct.Pin = RF_FINAL_STAGE_EN_Pin|ADF7012_TxDATA_Pin|GPS_Heater_LDO_EN_Pin|PLL_UnkownIC_LDO_EN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : MASTER_CLK_OUT_PLL_Pin */
+  GPIO_InitStruct.Pin = MASTER_CLK_OUT_PLL_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF0_MCO;
+  HAL_GPIO_Init(MASTER_CLK_OUT_PLL_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : DC_BOOST_EN_Pin */
   GPIO_InitStruct.Pin = DC_BOOST_EN_Pin;

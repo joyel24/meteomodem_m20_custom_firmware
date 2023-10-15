@@ -65,6 +65,8 @@ void Error_Handler(void);
 #define RF_FINAL_STAGE_EN_GPIO_Port GPIOB
 #define ADF7012_TxDATA_Pin GPIO_PIN_13
 #define ADF7012_TxDATA_GPIO_Port GPIOB
+#define GPS_Heater_LDO_EN_Pin GPIO_PIN_14
+#define GPS_Heater_LDO_EN_GPIO_Port GPIOB
 #define PLL_UnkownIC_LDO_EN_Pin GPIO_PIN_15
 #define PLL_UnkownIC_LDO_EN_GPIO_Port GPIOB
 #define ADF7012_CLK_Pin GPIO_PIN_7
@@ -73,11 +75,40 @@ void Error_Handler(void);
 #define ADF7012_DATA_GPIO_Port GPIOC
 #define ADF7012_LE_Pin GPIO_PIN_9
 #define ADF7012_LE_GPIO_Port GPIOC
+#define MASTER_CLK_OUT_PLL_Pin GPIO_PIN_8
+#define MASTER_CLK_OUT_PLL_GPIO_Port GPIOA
 #define DC_BOOST_EN_Pin GPIO_PIN_12
 #define DC_BOOST_EN_GPIO_Port GPIOA
 
 /* USER CODE BEGIN Private defines */
-
+#define Pin4_Pin GPIO_PIN_0
+#define Pin4_GPIO_Port GPIOA
+#define Pin13____Pin GPIO_PIN_3
+#define Pin13____GPIO_Port GPIOA
+#define Pin13_____Pin GPIO_PIN_1
+#define Pin13_____GPIO_Port GPIOB
+#define Pin9_Pin GPIO_PIN_2
+#define Pin9_GPIO_Port GPIOB
+#define Pin7_Pin GPIO_PIN_10
+#define Pin7_GPIO_Port GPIOB
+#define Pin6_Pin GPIO_PIN_11
+#define Pin6_GPIO_Port GPIOB
+#define TXDATA_Pin GPIO_PIN_13
+#define TXDATA_GPIO_Port GPIOB
+#define GPS_Supply_Pin GPIO_PIN_14
+#define GPS_Supply_GPIO_Port GPIOB
+#define CLK_Pin GPIO_PIN_7
+#define CLK_GPIO_Port GPIOC
+#define DATA_Pin GPIO_PIN_8
+#define DATA_GPIO_Port GPIOC
+#define LE_Pin GPIO_PIN_9
+#define LE_GPIO_Port GPIOC
+#define OSC2_Pin GPIO_PIN_8
+#define OSC2_GPIO_Port GPIOA
+#define Main_Supply_Pin GPIO_PIN_12
+#define Main_Supply_GPIO_Port GPIOA
+#define GPS_Data_Pin GPIO_PIN_11
+#define GPS_Data_GPIO_Port GPIOC
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
