@@ -178,68 +178,6 @@ int main(void)
 
 			case 1:
 				printstr("case 1");
-
-				for (int i=0; i<8; i++){
-					HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-					HAL_Delay(40);
-				}
-				HAL_Delay(500);
-				for (int i=0; i<1; i++){
-					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, SET);
-					HAL_Delay(500);
-					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, RESET);
-					HAL_Delay(500);
-				}
-
-
-				HAL_GPIO_WritePin(PLL_UnkownIC_LDO_EN_GPIO_Port, PLL_UnkownIC_LDO_EN_Pin, GPIO_PIN_SET); //Enable PLL &
-				HAL_GPIO_WritePin(RF_FINAL_STAGE_EN_GPIO_Port, RF_FINAL_STAGE_EN_Pin, GPIO_PIN_SET); //Enable RF Stage
-				printstr("PLL & RF Stage : ON");
-				HAL_Delay(200);
-
-				//403,5 MHz
-				myspi(0b00000011110001000010000001001100);/* Reg 0 R Register
-				Output divider = devide 2 0b01
-				VCO Adjustment = Max VCO Adj 0b11
-				Clock out divider = 0b1000 = 16
-				XOEB = 1 (XTAL Osc Off)
-				Crystal doubler OFF
-				4bit R div = 0b001 = 1
-				11Bit Freq err corr 0b10011
-				*/
-				myspi(0b00000000000011001001110000000001);/*
-				Prescaler = 0b0 = 4/5
-				8Bits integer N = 0b110010
-				12bits factional N = 0b011100000000
-
-				*/
-				myspi(0b00000000000000000101111111100010);/*
-				Modulation register
-				Index counter 0b00 16
-				GFSK Mod 0b000 0
-				Modulation deviation ????
-				Power ampli 0b111111
-				GOOK 0 = Gaussian OOK = Off
-				Mod control 0b00 FSK
-				*/
-				myspi(0b00000000011101000001100010101111);/*
-				PA BIAS 0b111 = 12uA
-				VCO BIAS current 0b0100
-				LD1 0b0 3 Cycles
-				MUXOUT = 0b0011 = Regulator ready
-				VCO Disable = 0b0 = VCO ON
-				Bleed Down up 0b0 0b0 off off
-				Charge pump = 0b10 1.5mA
-				Data invert = 0b1 = inverted
-				clkout enable = 0b0 = Off
-				PA Enable = 0b1 PA on
-				PLL Enable = 0b1 PLL On
-				*/
-
-				myspi(0b00000011110001000010000001001100);
-				myspi(setfreq(433920000, 8000000, 0));
-				myspi(0b00000000000000000010110011100010);
-
 				mode1();
 				/*
 				while (activeMode==1) {
