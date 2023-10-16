@@ -115,6 +115,7 @@ void Error_Handler(void);
 */
 extern uint8_t activeMode;
 extern uint8_t maxActiveMode;
+extern uint16_t	TIM21_increment;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

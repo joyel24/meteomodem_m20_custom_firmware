@@ -43,15 +43,17 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-TIM_HandleTypeDef htim6;
+TIM_HandleTypeDef htim21;
 
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
 
-uint8_t activeMode = 2;
-uint8_t maxActiveMode = 5;
-uint8_t serialTXbuffer[2000];
+uint8_t		activeMode = 3;
+uint8_t		maxActiveMode = 5;
+uint8_t		serialTXbuffer[2000];
+uint16_t	TIM21_value;
+uint16_t	TIM21_increment = 0;
 
 //extern void mode0();
 
@@ -61,7 +63,7 @@ uint8_t serialTXbuffer[2000];
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART1_UART_Init(void);
-static void MX_TIM6_Init(void);
+static void MX_TIM21_Init(void);
 /* USER CODE BEGIN PFP */
 
 
@@ -187,25 +189,45 @@ void mode3(){
 
 void TxDATA_test(char bits[]){
 	//if (stop==0){
+	__HAL_TIM_SET_COUNTER(&htim21, 0);
+
+	if (HAL_TIM_Base_Start_IT(&htim21) != HAL_OK)
+	  {
+	    /* Starting Error */
+	    Error_Handler();
+	  }
+
 	for (int16_t bitNumber=0; bitNumber < 1120; bitNumber++){
+		TIM21_value = __HAL_TIM_GET_COUNTER(&htim21);
+
+		sprintf(serialTXbuffer,"%u\n %u\n", TIM21_value, TIM21_increment);
+		HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+		clearbuffer();
+
 		if (bits[bitNumber] == '0'){
+			//while ( __HAL_TIM_GET_COUNTER(&htim6) < bitNumber*(8000000/1200) ){}
 			HAL_GPIO_WritePin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin, GPIO_PIN_RESET);
 
 			//HAL_UART_Transmit(&huart1, UartBuffOut, strlen(UartBuffOut), 1000);
 			//clearbuffer();
 			//sprintf(serialTXbuffer,"%d", HAL_GPIO_ReadPin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin));
 			//HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
-			HAL_Delay(1);
+			//HAL_Delay(1);
 			}
 		else if(bits[bitNumber] == '1'){
 			//HAL_UART_Transmit(&huart1, UartBuffOut, strlen(UartBuffOut), 1000);
+			//while ( __HAL_TIM_GET_COUNTER(&htim6) < bitNumber*(8000000/1200) ){}
 			HAL_GPIO_WritePin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin, GPIO_PIN_SET);
 			//clearbuffer();
 			//sprintf(serialTXbuffer,"%d", HAL_GPIO_ReadPin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin));
 			//HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
-			HAL_Delay(1);
+			//HAL_Delay(1);
 		}
 		//bitNumber++;
+		if ( HAL_GPIO_ReadPin(BUTTON_GPIO_Port, BUTTON_Pin) == 0 ) {
+			activeMode++;
+					break;
+				}
 	}
 }
 
@@ -250,7 +272,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART1_UART_Init();
-  MX_TIM6_Init();
+  MX_TIM21_Init();
   /* USER CODE BEGIN 2 */
 
   HAL_GPIO_WritePin(DC_BOOST_EN_GPIO_Port, DC_BOOST_EN_Pin, GPIO_PIN_SET); //Enable DC Boost
@@ -506,40 +528,47 @@ void SystemClock_Config(void)
 }
 
 /**
-  * @brief TIM6 Initialization Function
+  * @brief TIM21 Initialization Function
   * @param None
   * @retval None
   */
-static void MX_TIM6_Init(void)
+static void MX_TIM21_Init(void)
 {
 
-  /* USER CODE BEGIN TIM6_Init 0 */
+  /* USER CODE BEGIN TIM21_Init 0 */
 
-  /* USER CODE END TIM6_Init 0 */
+  /* USER CODE END TIM21_Init 0 */
 
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
 
-  /* USER CODE BEGIN TIM6_Init 1 */
+  /* USER CODE BEGIN TIM21_Init 1 */
 
-  /* USER CODE END TIM6_Init 1 */
-  htim6.Instance = TIM6;
-  htim6.Init.Prescaler = 800-1;
-  htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim6.Init.Period = 65536-1;
-  htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
+  /* USER CODE END TIM21_Init 1 */
+  htim21.Instance = TIM21;
+  htim21.Init.Prescaler = 0;
+  htim21.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim21.Init.Period = 65535;
+  htim21.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim21.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim21) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim21, &sClockSourceConfig) != HAL_OK)
   {
     Error_Handler();
   }
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim6, &sMasterConfig) != HAL_OK)
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim21, &sMasterConfig) != HAL_OK)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN TIM6_Init 2 */
+  /* USER CODE BEGIN TIM21_Init 2 */
 
-  /* USER CODE END TIM6_Init 2 */
+  /* USER CODE END TIM21_Init 2 */
 
 }
 

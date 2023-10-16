@@ -55,6 +55,7 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern TIM_HandleTypeDef htim21;
 extern UART_HandleTypeDef huart1;
 /* USER CODE BEGIN EV */
 
@@ -139,6 +140,24 @@ void SysTick_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32l0xx.s).                    */
 /******************************************************************************/
+
+/**
+  * @brief This function handles TIM21 global interrupt.
+  */
+void TIM21_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM21_IRQn 0 */
+
+  /* USER CODE END TIM21_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim21);
+  /* USER CODE BEGIN TIM21_IRQn 1 */
+
+  TIM21_increment++;
+  //HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+
+
+  /* USER CODE END TIM21_IRQn 1 */
+}
 
 /**
   * @brief This function handles USART1 global interrupt / USART1 wake-up interrupt through EXTI line 25.
