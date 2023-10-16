@@ -9,5 +9,4 @@
 #define INC_MODES_H_
 
 
-
 #endif /* INC_MODES_H_ */

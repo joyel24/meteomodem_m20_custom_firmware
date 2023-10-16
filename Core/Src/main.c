@@ -98,75 +98,7 @@ void clearbuffer(){
 	}
 }
 
-void printstr(char test[]){
-	sprintf(serialTXbuffer,"%s \n", test);
-	HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
-	clearbuffer();
-}
 
-void mode1(){
-	HAL_GPIO_WritePin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin, RESET);
-	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, RESET);
-	sprintf(serialTXbuffer,"mode1()\nTxDATA:\n");
-	HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
-	HAL_Delay(100);
-	//HAL_UART_Transmit_IT(&huart1, serialTXbuffer, sizeof (serialTXbuffer));
-	while (activeMode == 1){
-
-
-		//while ( HAL_GPIO_ReadPin(BUTTON_GPIO_Port, BUTTON_Pin == 0) ) {
-			HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-			HAL_GPIO_TogglePin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin);
-			clearbuffer();
-			sprintf(serialTXbuffer,"%d", HAL_GPIO_ReadPin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin));
-			HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
-			HAL_Delay(100);
-		//}
-
-		//HAL_GPIO_WritePin(GPS_Heater_LDO_EN_GPIO_Port, GPS_Heater_LDO_EN_Pin, GPIO_PIN_RESET); //Disable GPS & Heater
-
-		if ( HAL_GPIO_ReadPin(BUTTON_GPIO_Port, BUTTON_Pin) == 0 ) {
-			sprintf(serialTXbuffer,"\nswitch mode request\n");
-			HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
-			clearbuffer();
-			HAL_GPIO_WritePin(PLL_UnkownIC_LDO_EN_GPIO_Port, PLL_UnkownIC_LDO_EN_Pin, GPIO_PIN_RESET); //Disable PLL &
-			HAL_GPIO_WritePin(RF_FINAL_STAGE_EN_GPIO_Port, RF_FINAL_STAGE_EN_Pin, GPIO_PIN_RESET);
-			printstr("PLL & RF Stage : OFF");
-			activeMode++;
-		}
-	}
-}
-
-void mode3(){
-	sprintf(serialTXbuffer,"mode3()\nTxDATA:\n");
-	HAL_GPIO_WritePin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin, RESET);
-	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, RESET);
-	HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
-	HAL_Delay(100);
-
-	while (activeMode == 3 ){
-		sprintf(serialTXbuffer,"mode3() before TxDATA_test()\n");
-		HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
-		clearbuffer();
-
-		TxDATA_test("1010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101001111100110100100001010111011000011110101000100111000001100101110111101010001001110000011001011101001011100110100110011000000011110001110010000100011110000000100111101010001001110000011001011101111010100010011100000110010111011110101000100111000001100101110111101010001001110000011001011101111010100010011100000110010111011110101000100111000001100101110111101010001001110000011001011101111010100010011100000110010111011110101000100111000001100101110111101010001001110000011001011101111010100010011100000110010111011110101000100111000001100101110111110011010010000101011101100001111010100010011100000110010111011110101000100111000001100101110");
-
-		sprintf(serialTXbuffer,"mode3() after TxDATA_test()\n");
-		HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
-		clearbuffer();
-
-		if ( HAL_GPIO_ReadPin(BUTTON_GPIO_Port, BUTTON_Pin) == 0 ) {
-			sprintf(serialTXbuffer,"\nswitch mode request\n");
-			HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
-			clearbuffer();
-			HAL_GPIO_WritePin(PLL_UnkownIC_LDO_EN_GPIO_Port, PLL_UnkownIC_LDO_EN_Pin, GPIO_PIN_RESET); //Disable PLL &
-			HAL_GPIO_WritePin(RF_FINAL_STAGE_EN_GPIO_Port, RF_FINAL_STAGE_EN_Pin, GPIO_PIN_RESET);
-			printstr("PLL & RF Stage : OFF");
-			//activeMode++;
-		}
-		HAL_Delay(1500);
-	}
-}
 
 	/*
 		if (bitNumber >= 1120){
@@ -429,6 +361,8 @@ int main(void)
 				printstr("PLL & RF Stage : ON");
 				HAL_Delay(200);
 
+
+
 				//403,5 MHz
 				myspi(0b00000011110001000010000001001100);/* Reg 0 R Register
 				Output divider = devide 2 0b01
@@ -469,8 +403,9 @@ int main(void)
 				*/
 
 				myspi(0b00000011110001000010000001001100);
+				//myspi(0b00000000000000000010110011100010);
+
 				myspi(setfreq(433920000, 8000000, 0));
-				myspi(0b00000000000000000010110011100010);
 
 				mode3();
 				break;

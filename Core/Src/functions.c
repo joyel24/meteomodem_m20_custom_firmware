@@ -7,8 +7,14 @@
 
 #include "functions.h"
 #include "stm32l0xx_hal.h"
-
 #include "main.h"
+
+
+void printstr(char test[]){
+	sprintf(serialTXbuffer,"%s \n", test);
+	HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+	clearbuffer();
+}
 
 
 void TxDATA_test(char bits[]){
