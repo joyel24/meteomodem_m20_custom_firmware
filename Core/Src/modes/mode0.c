@@ -9,8 +9,6 @@
 #include "stm32l0xx_hal.h"
 
 void mode0(){
-	HAL_GPIO_WritePin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin, RESET);
-	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, RESET);
 	sprintf(serialTXbuffer,"mode0()\nTxDATA:\n");
 	HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
 	HAL_Delay(100);
@@ -36,6 +34,7 @@ void mode0(){
 			HAL_GPIO_WritePin(PLL_UnkownIC_LDO_EN_GPIO_Port, PLL_UnkownIC_LDO_EN_Pin, GPIO_PIN_RESET); //Disable PLL &
 			HAL_GPIO_WritePin(RF_FINAL_STAGE_EN_GPIO_Port, RF_FINAL_STAGE_EN_Pin, GPIO_PIN_RESET);
 			printstr("PLL & RF Stage : OFF");
+			HAL_Delay(500);
 			activeMode++;
 		}
 	}

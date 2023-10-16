@@ -49,7 +49,7 @@ UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
 
-uint8_t		activeMode = 3;
+uint8_t		activeMode = 2;
 uint8_t		maxActiveMode = 5;
 uint8_t		serialTXbuffer[2000];
 uint16_t	TIM21_value;
@@ -190,7 +190,7 @@ void mode3(){
 			HAL_GPIO_WritePin(PLL_UnkownIC_LDO_EN_GPIO_Port, PLL_UnkownIC_LDO_EN_Pin, GPIO_PIN_RESET); //Disable PLL &
 			HAL_GPIO_WritePin(RF_FINAL_STAGE_EN_GPIO_Port, RF_FINAL_STAGE_EN_Pin, GPIO_PIN_RESET);
 			printstr("PLL & RF Stage : OFF");
-			activeMode++;
+			//activeMode++;
 		}
 		HAL_Delay(1500);
 	}
@@ -228,6 +228,7 @@ void TxDATA_test(char bits[]){
 			if (bits[bitNumber] == '0'){
 				while ( ( (TIM21_increment * 65535) + __HAL_TIM_GET_COUNTER(&htim21) ) < bitNumber*(8000000/1200) ){}
 				HAL_GPIO_WritePin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
 
 				//HAL_UART_Transmit(&huart1, UartBuffOut, strlen(UartBuffOut), 1000);
 				//clearbuffer();
@@ -239,6 +240,8 @@ void TxDATA_test(char bits[]){
 				//HAL_UART_Transmit(&huart1, UartBuffOut, strlen(UartBuffOut), 1000);
 				while ( ( (TIM21_increment * 65535) + __HAL_TIM_GET_COUNTER(&htim21) ) < bitNumber*(8000000/1200) ){}
 				HAL_GPIO_WritePin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin, GPIO_PIN_SET);
+				HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+
 				//clearbuffer();
 				//sprintf(serialTXbuffer,"%d", HAL_GPIO_ReadPin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin));
 				//HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
@@ -336,13 +339,25 @@ int main(void)
 	HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
 	clearbuffer();
 
-  	if (activeMode > maxActiveMode){activeMode=0;}
+  	if (activeMode >= maxActiveMode){activeMode=0;}
 
 		switch (activeMode)
 		{
-			if (activeMode > maxActiveMode){activeMode=0;}
 			case 0:
 				printstr("case 0");
+
+				for (int i=0; i<8; i++){
+					HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+					HAL_Delay(40);
+				}
+				HAL_Delay(500);
+
+				HAL_GPIO_WritePin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin, RESET);
+				HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, RESET);
+				sprintf(serialTXbuffer,"mode0()\nTxDATA:\n");
+				HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+				HAL_Delay(100);
+
 				//HAL_GPIO_WritePin(GPS_Heater_LDO_EN_GPIO_Port, GPS_Heater_LDO_EN_Pin, GPIO_PIN_SET); //Enable GPS & Heater
 				HAL_GPIO_WritePin(PLL_UnkownIC_LDO_EN_GPIO_Port, PLL_UnkownIC_LDO_EN_Pin, GPIO_PIN_SET); //Enable PLL &
 				HAL_GPIO_WritePin(RF_FINAL_STAGE_EN_GPIO_Port, RF_FINAL_STAGE_EN_Pin, GPIO_PIN_SET); //Enable RF Stage
@@ -396,8 +411,21 @@ int main(void)
 				break;
 
 			case 1:
-
 				printstr("case 1");
+
+				for (int i=0; i<8; i++){
+					HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+					HAL_Delay(40);
+				}
+				HAL_Delay(500);
+				for (int i=0; i<1; i++){
+					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, SET);
+					HAL_Delay(500);
+					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, RESET);
+					HAL_Delay(500);
+				}
+
+
 				HAL_GPIO_WritePin(PLL_UnkownIC_LDO_EN_GPIO_Port, PLL_UnkownIC_LDO_EN_Pin, GPIO_PIN_SET); //Enable PLL &
 				HAL_GPIO_WritePin(RF_FINAL_STAGE_EN_GPIO_Port, RF_FINAL_STAGE_EN_Pin, GPIO_PIN_SET); //Enable RF Stage
 				printstr("PLL & RF Stage : ON");
@@ -454,15 +482,42 @@ int main(void)
 				}*/
 				break;
 			case 2:
+				printstr("case 2 STANDBY");
+				for (int i=0; i<8; i++){
+					HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+					HAL_Delay(40);
+				}
+				HAL_Delay(500);
+				for (int i=0; i<2; i++){
+					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, SET);
+					HAL_Delay(500);
+					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, RESET);
+					HAL_Delay(500);
+				}
+				HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, RESET);
 
-				printstr("case 2 not yet programmed (off tx)");
+
 				while (activeMode==2) {
 					HAL_Delay(500);
 					if ( HAL_GPIO_ReadPin(BUTTON_GPIO_Port, BUTTON_Pin) ==0 ) { activeMode++; }
 				}
 				break;
+
 			case 3:
 				printstr("case 3");
+				for (int i=0; i<8; i++){
+					HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+					HAL_Delay(40);
+				}
+				HAL_Delay(500);
+				for (int i=0; i<3; i++){
+					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, SET);
+					HAL_Delay(500);
+					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, RESET);
+					HAL_Delay(500);
+				}
+
+
 				HAL_GPIO_WritePin(PLL_UnkownIC_LDO_EN_GPIO_Port, PLL_UnkownIC_LDO_EN_Pin, GPIO_PIN_SET); //Enable PLL &
 				HAL_GPIO_WritePin(RF_FINAL_STAGE_EN_GPIO_Port, RF_FINAL_STAGE_EN_Pin, GPIO_PIN_SET); //Enable RF Stage
 				printstr("PLL & RF Stage : ON");
@@ -514,8 +569,26 @@ int main(void)
 				mode3();
 				break;
 			case 4:
-				printstr("case 4 > Switch to case 0");
-				activeMode=0;
+				printstr("case 4");
+
+				HAL_GPIO_WritePin(PLL_UnkownIC_LDO_EN_GPIO_Port, PLL_UnkownIC_LDO_EN_Pin, GPIO_PIN_RESET); //Disable PLL &
+				HAL_GPIO_WritePin(RF_FINAL_STAGE_EN_GPIO_Port, RF_FINAL_STAGE_EN_Pin, GPIO_PIN_RESET);
+				printstr("PLL & RF Stage : OFF");
+
+				for (int i=0; i<8; i++){
+					HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+					HAL_Delay(40);
+				}
+				HAL_Delay(500);
+				for (int i=0; i<4; i++){
+					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, SET);
+					HAL_Delay(500);
+					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, RESET);
+					HAL_Delay(500);
+				}
+				HAL_Delay(1000);
+
+				activeMode++;
 				break;
 			default:
 				break;
