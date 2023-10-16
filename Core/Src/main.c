@@ -404,7 +404,7 @@ int main(void)
 				*/
 
 				myspi(0b00000011110001000010000001001100);
-				myspi(setfreq(446100000, 8000000, 0));
+				myspi(setfreq(433920000, 8000000, 0));
 				myspi(0b00000000000000000010110011100010);
 
 				mode0();
@@ -471,7 +471,7 @@ int main(void)
 				*/
 
 				myspi(0b00000011110001000010000001001100);
-				myspi(setfreq(446100000, 8000000, 0));
+				myspi(setfreq(433920000, 8000000, 0));
 				myspi(0b00000000000000000010110011100010);
 
 				mode1();
@@ -494,13 +494,23 @@ int main(void)
 					HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, RESET);
 					HAL_Delay(500);
 				}
-				HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, RESET);
+				//HAL_GPIO_WritePin(DC_BOOST_EN_GPIO_Port, DC_BOOST_EN_Pin, GPIO_PIN_RESET); //STOP DC Boost
+				HAL_GPIO_WritePin(PLL_UnkownIC_LDO_EN_GPIO_Port, PLL_UnkownIC_LDO_EN_Pin, GPIO_PIN_RESET); //STOP PLL &
+				HAL_GPIO_WritePin(RF_FINAL_STAGE_EN_GPIO_Port, RF_FINAL_STAGE_EN_Pin, GPIO_PIN_RESET); //STOP RF Stage
 
-
+				uint8_t cnt=0;
 				while (activeMode==2) {
-					HAL_Delay(500);
-					if ( HAL_GPIO_ReadPin(BUTTON_GPIO_Port, BUTTON_Pin) ==0 ) { activeMode++; }
+					HAL_Delay(2500);
+					cnt++;
+					if ( HAL_GPIO_ReadPin(BUTTON_GPIO_Port, BUTTON_Pin) ==0 ) {
+						HAL_GPIO_WritePin(DC_BOOST_EN_GPIO_Port, DC_BOOST_EN_Pin, GPIO_PIN_SET);
+						activeMode++;
+					}
+					if (cnt==5) {
+						HAL_GPIO_WritePin(DC_BOOST_EN_GPIO_Port, DC_BOOST_EN_Pin, GPIO_PIN_RESET); //STOP DC Boost
+					}
 				}
+
 				break;
 
 			case 3:
