@@ -47,14 +47,17 @@
 TIM_HandleTypeDef htim21;
 
 UART_HandleTypeDef huart1;
+DMA_HandleTypeDef hdma_usart1_rx;
 
 /* USER CODE BEGIN PV */
 
-uint8_t		activeMode = 2;
+uint8_t		activeMode = 1;
 uint8_t		maxActiveMode = 5;
 uint8_t		serialTXbuffer[2000];
 uint16_t	TIM21_value;
 uint16_t	TIM21_increment = 0;
+
+uint32_t test = 0;
 
 //extern void mode0();
 
@@ -63,6 +66,7 @@ uint16_t	TIM21_increment = 0;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_TIM21_Init(void);
 /* USER CODE BEGIN PFP */
@@ -72,6 +76,51 @@ static void MX_TIM21_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+#define RxBuf_SIZE 32
+#define MainBuf_SIZE 32
+
+uint8_t RxBuf[RxBuf_SIZE];
+uint8_t MainBuf[MainBuf_SIZE];
+
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
+{
+	if (huart->Instance == USART1)
+	{
+		memcpy (MainBuf, RxBuf, Size);
+
+		HAL_UARTEx_ReceiveToIdle_DMA(&huart1, RxBuf, RxBuf_SIZE);
+		__HAL_DMA_DISABLE_IT(&hdma_usart1_rx, DMA_IT_HT);
+
+		//for (uint8_t var = 31; var >= 0; var--) {
+		for (uint8_t var = 0; var < 31; var++) {
+			//uint8_t pos=30;
+			//test[var] = RxBuf[var];
+			if (MainBuf[var] == 49){
+				//test << 0b1;
+				test+=1;
+			}
+			//if(var <= 31)
+			test<<=1;
+			//pos--;
+			/*
+			else if (RxBuf[var] == 48){
+				//test << 0b0;
+				test=2;
+			}*/
+
+		}
+
+		//test = MainBuf;
+		myspi(test);
+
+		//for (uint8_t var = 0; var <= 33; ++var) {
+			//test[var] = RxBuf[var];
+		//}
+
+		//myspi(0b00000000000011011000111101011101);
+	}
+}
 
 uint32_t setfreq(float freq, float fPFD, uint8_t prescaler)
 {
@@ -140,9 +189,13 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_USART1_UART_Init();
   MX_TIM21_Init();
   /* USER CODE BEGIN 2 */
+
+  HAL_UARTEx_ReceiveToIdle_DMA(&huart1, RxBuf, RxBuf_SIZE);
+  __HAL_DMA_DISABLE_IT(&hdma_usart1_rx, DMA_IT_HT);
 
   HAL_GPIO_WritePin(DC_BOOST_EN_GPIO_Port, DC_BOOST_EN_Pin, GPIO_PIN_SET); //Enable DC Boost
 
@@ -330,6 +383,22 @@ static void MX_USART1_UART_Init(void)
   /* USER CODE BEGIN USART1_Init 2 */
 
   /* USER CODE END USART1_Init 2 */
+
+}
+
+/**
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void)
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA1_Channel2_3_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel2_3_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel2_3_IRQn);
 
 }
 
