@@ -84,15 +84,103 @@ void mode1(){
 
 
 		//while ( HAL_GPIO_ReadPin(BUTTON_GPIO_Port, BUTTON_Pin == 0) ) {
-			HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-			HAL_GPIO_TogglePin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin);
-			clearbuffer();
-			sprintf(serialTXbuffer,"%d", HAL_GPIO_ReadPin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin));
+			//HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+			//HAL_GPIO_TogglePin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin);
+			//clearbuffer();
+			//sprintf(serialTXbuffer,"%d", HAL_GPIO_ReadPin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin));
 			//HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
-			HAL_Delay(100);
+			//HAL_Delay(2);
 		//}
 
 		//HAL_GPIO_WritePin(GPS_Heater_LDO_EN_GPIO_Port, GPS_Heater_LDO_EN_Pin, GPIO_PIN_RESET); //Disable GPS & Heater
+
+
+		if ( HAL_GPIO_ReadPin(BUTTON_GPIO_Port, BUTTON_Pin) == 0 ) {
+			sprintf(serialTXbuffer,"\nswitch mode request\n");
+			HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+			clearbuffer();
+			HAL_GPIO_WritePin(PLL_UnkownIC_LDO_EN_GPIO_Port, PLL_UnkownIC_LDO_EN_Pin, GPIO_PIN_RESET); //Disable PLL &
+			HAL_GPIO_WritePin(RF_FINAL_STAGE_EN_GPIO_Port, RF_FINAL_STAGE_EN_Pin, GPIO_PIN_RESET);
+			printstr("PLL & RF Stage : OFF");
+			activeMode++;
+		}
+
+		TxDATA_test2("1010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101001111100110100100001010111011000011110101000100111000001100101110111101010001001110000011001011101001011100110100110011000000011110001110010000100011110000000100111101010001001110000011001011101111010100010011100000110010111011110101000100111000001100101110111101010001001110000011001011101111010100010011100000110010111011110101000100111000001100101110111101010001001110000011001011101111010100010011100000110010111011110101000100111000001100101110111101010001001110000011001011101111010100010011100000110010111011110101000100111000001100101110111110011010010000101011101100001111010100010011100000110010111011110101000100111000001100101110");
+
+	}
+}
+
+
+
+
+
+
+void TxDATA_AFSK_TEST(char bits[]){
+	//if (stop==0){
+	sprintf(serialTXbuffer,"TxDATA_test() begin\n");
+	HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+	clearbuffer();
+
+	uint8_t activeModeTemp = activeMode;
+
+
+	while (activeModeTemp == activeMode) {
+		sprintf(serialTXbuffer,"TxDATA_test() while begin\n");
+		HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+		clearbuffer();
+
+		__HAL_TIM_SET_COUNTER(&htim21, 0);
+		TIM21_increment=0;
+
+		uint32_t test = ( (TIM21_increment * 65535) + __HAL_TIM_GET_COUNTER(&htim21) );
+		//uint32_t test2 = bitNumber*(8000000/1200);
+		sprintf(serialTXbuffer,"%u \n", test);
+		HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+		clearbuffer();
+
+		sprintf(serialTXbuffer,"%u \n", strlen(bits));
+				HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+				clearbuffer();
+		printstr(bits);
+
+		for (int16_t bitNumber=0; bitNumber < 1120; bitNumber++){
+			TIM21_value = __HAL_TIM_GET_COUNTER(&htim21);
+
+			//sprintf(serialTXbuffer,"%u\n %u\n", TIM21_value, TIM21_increment);
+			//HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+			//clearbuffer();
+
+			if (bits[bitNumber] == '0'){
+				while ( ( (TIM21_increment * 65535) + __HAL_TIM_GET_COUNTER(&htim21) ) < bitNumber*(8000000/1200) ){}
+				HAL_GPIO_WritePin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin, GPIO_PIN_RESET);
+				//HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+
+				//HAL_UART_Transmit(&huart1, UartBuffOut, strlen(UartBuffOut), 1000);
+				//clearbuffer();
+				//sprintf(serialTXbuffer,"%d", HAL_GPIO_ReadPin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin));
+				//HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+				//HAL_Delay(1);
+				}
+			else if(bits[bitNumber] == '1'){
+				//HAL_UART_Transmit(&huart1, UartBuffOut, strlen(UartBuffOut), 1000);
+				while ( ( (TIM21_increment * 65535) + __HAL_TIM_GET_COUNTER(&htim21) ) < bitNumber*(8000000/1200) ){}
+				HAL_GPIO_WritePin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin, GPIO_PIN_SET);
+				//HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+
+				//clearbuffer();
+				//sprintf(serialTXbuffer,"%d", HAL_GPIO_ReadPin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin));
+				//HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+				//HAL_Delay(1);
+
+			}
+			//bitNumber++;
+
+		}
+
+		sprintf(serialTXbuffer,"TxDATA_test() while end\n");
+		HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+		clearbuffer();
+		HAL_Delay(2500);
 
 		if ( HAL_GPIO_ReadPin(BUTTON_GPIO_Port, BUTTON_Pin) == 0 ) {
 			sprintf(serialTXbuffer,"\nswitch mode request\n");
@@ -104,5 +192,92 @@ void mode1(){
 			activeMode++;
 		}
 	}
+
+	sprintf(serialTXbuffer,"TxDATA_test() end\n");
+	HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+	clearbuffer();
 }
 
+
+
+/////////////////////////////
+void TxDATA_test2(char bits[]){
+	//if (stop==0){
+	sprintf(serialTXbuffer,"TxDATA_test() begin\n");
+	HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+	clearbuffer();
+
+	uint8_t activeModeTemp = activeMode;
+
+
+	while (activeModeTemp == activeMode) {
+		myspi(0b00000000000000000010100000100010);
+
+		sprintf(serialTXbuffer,"TxDATA_test() while begin\n");
+		HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+		clearbuffer();
+
+		__HAL_TIM_SET_COUNTER(&htim21, 0);
+		TIM21_increment=0;
+
+		uint32_t test = ( (TIM21_increment * 65535) + __HAL_TIM_GET_COUNTER(&htim21) );
+		//uint32_t test2 = bitNumber*(8000000/1200);
+		sprintf(serialTXbuffer,"%u \n", test);
+		HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+		clearbuffer();
+		myspi(0b00000000000000000010100000100010);
+		//HAL_Delay(500);
+		for (int16_t bitNumber=0; bitNumber < 1120; bitNumber++){
+			TIM21_value = __HAL_TIM_GET_COUNTER(&htim21);
+
+			//sprintf(serialTXbuffer,"%u\n %u\n", TIM21_value, TIM21_increment);
+			//HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+			//clearbuffer();
+
+			if (bits[bitNumber] == '0'){
+				while ( ( (TIM21_increment * 65535) + __HAL_TIM_GET_COUNTER(&htim21) ) < bitNumber*(8000000/1200) ){}
+				HAL_GPIO_WritePin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+
+				//HAL_UART_Transmit(&huart1, UartBuffOut, strlen(UartBuffOut), 1000);
+				//clearbuffer();
+				//sprintf(serialTXbuffer,"%d", HAL_GPIO_ReadPin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin));
+				//HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+				//HAL_Delay(1);
+				}
+			else if(bits[bitNumber] == '1'){
+				//HAL_UART_Transmit(&huart1, UartBuffOut, strlen(UartBuffOut), 1000);
+				while ( ( (TIM21_increment * 65535) + __HAL_TIM_GET_COUNTER(&htim21) ) < bitNumber*(8000000/1200) ){}
+				HAL_GPIO_WritePin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin, GPIO_PIN_SET);
+				HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+
+				//clearbuffer();
+				//sprintf(serialTXbuffer,"%d", HAL_GPIO_ReadPin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin));
+				//HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+				//HAL_Delay(1);
+
+			}
+			//bitNumber++;
+		}
+		myspi(0b00000000000000000010100000000010);
+
+		sprintf(serialTXbuffer,"TxDATA_test() while end\n");
+		HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+		clearbuffer();
+		HAL_Delay(2500);
+
+		if ( HAL_GPIO_ReadPin(BUTTON_GPIO_Port, BUTTON_Pin) == 0 ) {
+			sprintf(serialTXbuffer,"\nswitch mode request\n");
+			HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+			clearbuffer();
+			HAL_GPIO_WritePin(PLL_UnkownIC_LDO_EN_GPIO_Port, PLL_UnkownIC_LDO_EN_Pin, GPIO_PIN_RESET); //Disable PLL &
+			HAL_GPIO_WritePin(RF_FINAL_STAGE_EN_GPIO_Port, RF_FINAL_STAGE_EN_Pin, GPIO_PIN_RESET);
+			printstr("PLL & RF Stage : OFF");
+			activeMode++;
+		}
+	}
+
+	sprintf(serialTXbuffer,"TxDATA_test() end\n");
+	HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+	clearbuffer();
+}

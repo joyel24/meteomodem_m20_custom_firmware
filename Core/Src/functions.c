@@ -27,6 +27,7 @@ void TxDATA_test(char bits[]){
 
 
 	while (activeModeTemp == activeMode) {
+		myspi(0b00000000000000000010100000100010);
 		sprintf(serialTXbuffer,"TxDATA_test() while begin\n");
 		HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
 		clearbuffer();
@@ -39,6 +40,8 @@ void TxDATA_test(char bits[]){
 		sprintf(serialTXbuffer,"%u \n", test);
 		HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
 		clearbuffer();
+		//myspi(0b00000000000000000010100000100010);
+		//HAL_Delay(500);
 		for (int16_t bitNumber=0; bitNumber < 1120; bitNumber++){
 			TIM21_value = __HAL_TIM_GET_COUNTER(&htim21);
 
@@ -69,9 +72,11 @@ void TxDATA_test(char bits[]){
 				//HAL_Delay(1);
 
 			}
+			//myspi(0b00000000000000000010100000000010);
 			//bitNumber++;
-
 		}
+		myspi(0b00000000000000000010100000000010);
+
 		sprintf(serialTXbuffer,"TxDATA_test() while end\n");
 		HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
 		clearbuffer();
