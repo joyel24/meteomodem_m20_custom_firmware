@@ -48,7 +48,7 @@ void mode0(){
 	12bits factional N = 0b011100000000
 
 	*/
-	myspi(0b00000000000000000101111111100010);/*
+	myspi(0b00000000000000000101000000100010);/*
 	Modulation register
 	Index counter 0b00 16
 	GFSK Mod 0b000 0

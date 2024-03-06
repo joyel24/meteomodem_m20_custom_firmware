@@ -51,7 +51,7 @@ DMA_HandleTypeDef hdma_usart1_rx;
 
 /* USER CODE BEGIN PV */
 
-uint8_t		activeMode = 1;
+uint8_t		activeMode = 0;
 uint8_t		maxActiveMode = 5;
 uint8_t		serialTXbuffer[2000];
 uint16_t	TIM21_value;
