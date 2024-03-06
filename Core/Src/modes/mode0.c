@@ -42,7 +42,8 @@ void mode0(){
 	4bit R div = 0b001 = 1
 	11Bit Freq err corr 0b10011
 	*/
-	myspi(0b00000000000011001001110000000001);/*
+	/*
+	myspi(0b00000000000011001001110000000001);
 	Prescaler = 0b0 = 4/5
 	8Bits integer N = 0b110010
 	12bits factional N = 0b011100000000
@@ -79,7 +80,7 @@ void mode0(){
 	//myspi(setfreq(433920000, 8000000, 0));
 	//setfreq(433920000, 8000000, 0);
 
-	myspi(0b00000000000011011000111101011101);
+	myspi(0b00000000000011011111000011001101);
 	//myspi(0x888669);
 
 
@@ -90,10 +91,15 @@ void mode0(){
 		//while ( HAL_GPIO_ReadPin(BUTTON_GPIO_Port, BUTTON_Pin == 0) ) {
 			HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 			HAL_GPIO_TogglePin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin);
+
+			/*
 			clearbuffer();
 			sprintf(serialTXbuffer,"%d", HAL_GPIO_ReadPin(ADF7012_TxDATA_GPIO_Port, ADF7012_TxDATA_Pin));
 			HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
+			*/
+
 			HAL_Delay(500);
+
 		//}
 
 		//HAL_GPIO_WritePin(GPS_Heater_LDO_EN_GPIO_Port, GPS_Heater_LDO_EN_Pin, GPIO_PIN_RESET); //Disable GPS & Heater

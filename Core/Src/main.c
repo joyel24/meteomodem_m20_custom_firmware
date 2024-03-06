@@ -93,15 +93,16 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 		__HAL_DMA_DISABLE_IT(&hdma_usart1_rx, DMA_IT_HT);
 
 		//for (uint8_t var = 31; var >= 0; var--) {
-		for (uint8_t var = 0; var < 31; var++) {
+		for (uint8_t var = 0; var < 32; var++) {
 			//uint8_t pos=30;
 			//test[var] = RxBuf[var];
 			if (MainBuf[var] == 49){
 				//test << 0b1;
 				test+=1;
 			}
-			//if(var <= 31)
-			test<<=1;
+			if(var < 31){
+				test<<=1;
+			}
 			//pos--;
 			/*
 			else if (RxBuf[var] == 48){
