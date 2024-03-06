@@ -43,8 +43,7 @@ void TxDATA_test(char bits[]){
 		//myspi(0b00000000000000000010100000100010);
 		//HAL_Delay(500);
 		for (int16_t bitNumber=0; bitNumber < 1120; bitNumber++){
-			TIM21_value = __HAL_TIM_GET_COUNTER(&htim21);
-
+			//TIM21_value = __HAL_TIM_GET_COUNTER(&htim21);
 			//sprintf(serialTXbuffer,"%u\n %u\n", TIM21_value, TIM21_increment);
 			//HAL_UART_Transmit(&huart1, serialTXbuffer, sizeof (serialTXbuffer), sizeof (serialTXbuffer));
 			//clearbuffer();
