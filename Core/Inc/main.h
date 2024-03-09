@@ -116,7 +116,7 @@ void Error_Handler(void);
 extern uint8_t activeMode;
 extern uint8_t maxActiveMode;
 extern uint16_t	TIM21_increment;
-extern uint16_t	TIM21_value;
+extern uint32_t	TIM21_value;
 extern TIM_HandleTypeDef htim21;
 
 /* USER CODE END Private defines */

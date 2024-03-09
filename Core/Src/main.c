@@ -54,7 +54,7 @@ DMA_HandleTypeDef hdma_usart1_rx;
 uint8_t		activeMode = 4;
 uint8_t		maxActiveMode = 5;
 uint8_t		serialTXbuffer[2000];
-uint16_t	TIM21_value;
+uint32_t	TIM21_value;
 uint16_t	TIM21_increment = 0;
 
 uint32_t test = 0;
@@ -232,7 +232,7 @@ int main(void)
 
 			case 1:
 				printstr("case 1");
-				mode1();
+				//mode1();
 				/*
 				while (activeMode==1) {
 					HAL_Delay(500);
@@ -243,10 +243,9 @@ int main(void)
 				printstr("case 2");
 				mode2();
 				break;
-
 			case 3:
 				printstr("case 3");
-				mode3();
+				//mode3();
 				break;
 			case 4:
 				printstr("case 4");
