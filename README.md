@@ -14,4 +14,8 @@ You can join us on Discord if you wanna talk about this project : https://discor
 
 
 <br><br>
-Thanks to @infrat who did an incredible Reverse Enginering work here : [PDF_M20_REVERSE](https://www.egimoto.com/dwld/17528ed1858138.pdf)
+Thanks to:<br>
+- Salim CHIAD F4IFB ([@schiad](https://github.com/schiad)) who encouraged me a lot to start this project, he made some very useful functions like sending data to the transmitter registers or a function that translate frequency into the coorresponding register instruction.<br>
+- Jarek Surmacz ([@infrat](https://github.com/infrat)) who I think made [the first opensource project on the M20](https://github.com/infrat/m20-playground), a simple thing that collect GPS data and print it to serial TX, it was inspiring for our first sandboxes.<br>
+- Tobias and Matthias who did an incredible M20 Reverse Enginering work on [their personnal blog](https://www.egimoto.com).<br>
+The magical PDF: [PDF_M20_REVERSE](https://www.egimoto.com/dwld/17528ed1858138.pdf)
